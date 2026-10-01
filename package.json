@@ -1,0 +1,29 @@
+{
+  "name": "refract-catalogs",
+  "version": "0.1.0",
+  "description": "Cataloghi Stremio e Nuvio dalle liste pubbliche Refract",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env index.js",
+    "dev": "node --env-file-if-exists=.env --watch index.js",
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check.js",
+    "test:live": "node scripts/live-check.js"
+  },
+  "dependencies": {
+    "cheerio": "1.1.2",
+    "express": "4.22.2"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "license": "MIT",
+  "author": "DevGizmo86",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevGizmo86/RefractCatalogs.git"
+  },
+  "devDependencies": {
+    "jsdom": "^27.4.0"
+  }
+}

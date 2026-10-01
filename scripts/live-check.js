@@ -1,0 +1,32 @@
+const assert = require('node:assert/strict');
+const { createRefractService } = require('../lib/refract');
+const { createResolver } = require('../lib/resolver');
+const { createCatalogService } = require('../lib/catalog');
+const { normalizeConfig } = require('../lib/config');
+async function main() {
+  const refract = createRefractService(); const resolver = createResolver();
+  const horrorUrl = 'https://getrefract.app/list/spooktober-2026-ux1fe';
+  const topUrl = 'https://getrefract.app/list/top-250-movies-j3xeo';
+  const [horror, top] = await Promise.all([refract.getList(horrorUrl), refract.getList(topUrl)]);
+  assert.ok(horror.count >= 3); assert.equal(top.count, 250);
+  console.log(`Liste lette: ${horror.name} (${horror.count}), ${top.name} (${top.count}).`);
+  const breakingBad = await resolver.resolve({ title: 'Breaking Bad', year: 2008 });
+  assert.equal(breakingBad.id, 'tt0903747'); assert.equal(breakingBad.type, 'series');
+  const catalogs = createCatalogService(refract, resolver);
+  const config = normalizeConfig({ lists: [{ url: horrorUrl, mode: 'both' }, { url: topUrl, mode: 'movie' }] });
+  const manifest = await catalogs.manifest(config, 'http://localhost:7000');
+  assert.equal(manifest.catalogs.length, 3);
+  const horrorPage = await catalogs.page(config, 'movie', `refract-${horror.slug}`);
+  console.log('Spooktober:', horrorPage.metas.map(meta => `${meta.name}: ${meta.id}`).join(', '));
+  assert.ok(horrorPage.metas.some(meta => meta.id === 'tt1457767'));
+  assert.ok(horrorPage.metas.some(meta => meta.id === 'tt0077651'));
+  const first = await catalogs.page(config, 'movie', `refract-${top.slug}`);
+  const second = await catalogs.page(config, 'movie', `refract-${top.slug}`, { skip: 20 });
+  assert.equal(first.metas.length, 20); assert.equal(second.metas.length, 20);
+  assert.equal(first.metas[0].id, 'tt0111161');
+  assert.equal(new Set([...first.metas, ...second.metas].map(meta => meta.id)).size, 40);
+  const meta = await resolver.getMeta('series', breakingBad.id);
+  assert.ok(meta.videos?.some(video => video.season === 1 && video.episode === 1));
+  console.log('Verifica live superata: film, serie con episodi, 250 elementi letti e prime due pagine senza duplicati.');
+}
+main().catch(error => { console.error(error.message); process.exitCode = 1; });

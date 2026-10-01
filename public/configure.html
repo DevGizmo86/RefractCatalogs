@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configura RefractCatalogs</title>
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/configure.css">
+  <script src="/assets/configure.js" defer></script>
+</head>
+<body>
+  <main id="addon">
+    <img class="logo" src="/assets/logo.svg" width="72" height="72" alt="">
+    <p class="eyebrow">STREMIO + NUVIO</p>
+    <h1>RefractCatalogs</h1>
+    <p class="intro">Le tue liste Refract, pronte da sfogliare.</p>
+    <section aria-labelledby="lists-title">
+      <div class="section-heading"><h2 id="lists-title">Le tue liste</h2><span id="list-count">0 / 30</span></div>
+      <p class="hint">Incolla il link condiviso di una lista pubblica. Ogni lista aggiunta avrà la sua riga.</p>
+      <form id="add-form">
+        <label for="new-url">Link della lista pubblica</label>
+        <div class="add-controls"><input id="new-url" type="url" required placeholder="https://getrefract.app/list/..." autocomplete="off"><button id="add-button" type="submit">+ Aggiungi lista</button></div>
+      </form>
+      <p id="add-error" class="error" role="alert"></p>
+      <div id="lists"></div>
+      <p id="empty-message" class="empty">Nessuna lista aggiunta. Inizia dal link della tua prima lista.</p>
+      <p class="hint mixed-note">Una lista con film e serie TV può generare entrambi i cataloghi. Scegli “Solo film” o “Solo serie TV” per mostrarne uno. Le liste seguono l’ordine delle righe.</p>
+    </section>
+    <section id="installation" aria-labelledby="install-title">
+      <h2 id="install-title">Porta le liste nella tua app</h2>
+      <p class="hint">Genera il collegamento dopo aver aggiunto o modificato le liste.</p>
+      <button id="generate-button" class="primary" type="button">Genera cataloghi</button>
+      <p id="status" role="status" aria-live="polite"></p>
+      <div id="result" hidden>
+        <p id="catalog-summary"></p>
+        <a id="installLink" class="install-link" href="#">INSTALLA SU STREMIO</a>
+        <button id="copyManifestBtn" type="button">Copia link manifest per Nuvio</button>
+        <label for="manifest-url">Link del manifest</label>
+        <input id="manifest-url" readonly type="text" aria-label="Link del manifest">
+        <a id="edit-link" href="#">Riapri questa configurazione</a>
+        <p class="hint">In Nuvio incolla il link nella sezione Addon. Dopo aggiunte, eliminazioni o cambi di ordine, reinstalla o aggiorna l’addon con il nuovo link. I contenuti delle liste si aggiornano automaticamente, con una cache di circa 30 minuti.</p>
+      </div>
+    </section>
+    <footer><p>Powered by <a href="https://github.com/DevGizmo86" target="_blank" rel="noopener noreferrer">DevGizmo</a></p><a class="support" href="https://buymeacoffee.com/devgizmo" target="_blank" rel="noopener noreferrer">☕ Support me</a></footer>
+  </main>
+  <script id="initial-config" type="application/json">__CONFIG_JSON__</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { createApp } = require('../index');
+const { decodeConfig } = require('../lib/config');
+test('server: configurazione, riapertura, manifest ordinato, catalogo e scheda', async t => {
+  const app = createApp({
+    refract: { getList: async url => { const slug = url.split('/').pop(); return { url, slug, name: slug, count: 1, author: 'DevGizmo', items: [{ title: 'Film', year: 2000 }] }; } },
+    resolver: { resolve: async () => ({ id: 'tt1234567', type: 'movie', name: 'Film' }), getMeta: async () => ({ id: 'tt1234567', type: 'movie', name: 'Film' }) }
+  });
+  const server = app.listen(0, '127.0.0.1'); await new Promise(resolve => server.once('listening', resolve));
+  t.after(() => server.close());
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  const configResponse = await fetch(`${origin}/api/configure`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lists: [{ url: 'https://getrefract.app/list/first-abc', mode: 'movie' }, { url: 'https://getrefract.app/list/second-abc', mode: 'both', name: '</script><img src=x onerror=alert(1)>' }] }) });
+  assert.equal(configResponse.status, 200);
+  const result = await configResponse.json();
+  const token = result.manifestPath.split('/')[1];
+  assert.equal(decodeConfig(token).lists.length, 2);
+  const manifestResponse = await fetch(origin + result.manifestPath); const manifest = await manifestResponse.json();
+  assert.equal(manifestResponse.headers.get('access-control-allow-origin'), '*');
+  assert.equal(manifest.catalogs.length, 3); assert.equal(manifest.catalogs[0].name, 'first-abc');
+  const html = await (await fetch(origin + result.configurePath)).text();
+  assert.ok(html.includes('\\u003c/script>')); assert.ok(!html.includes('<img src=x'));
+  const catalog = await (await fetch(`${origin}/${token}/catalog/movie/refract-first-abc/skip=0.json`)).json();
+  assert.equal(catalog.metas[0].id, 'tt1234567');
+  const meta = await (await fetch(`${origin}/${token}/meta/movie/tt1234567.json`)).json(); assert.equal(meta.meta.id, 'tt1234567');
+  const unknown = await fetch(`${origin}/${token}/catalog/movie/unknown.json`); assert.equal(unknown.status, 200); assert.deepEqual((await unknown.json()).metas, []);
+  const bad = await fetch(`${origin}/api/inspect`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://localhost/private' }) }); assert.equal(bad.status, 400);
+  assert.equal((await fetch(`${origin}/invalid/manifest.json`)).status, 400);
+  const base = await (await fetch(`${origin}/manifest.json`)).json(); assert.equal(base.behaviorHints.configurationRequired, true);
+});
