@@ -1,13 +1,13 @@
 # RefractCatalogs
 
-Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Prima versione: **0.1.0**.
+Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.1.1**.
 
 ## Configurazione
 
 1. Apri `/configure` dopo aver avviato il server.
 2. Incolla un link pubblico Refract e premi **Aggiungi lista**: viene creata una nuova riga e verificata la lista.
 3. Aggiungi altre liste (massimo 30). Ogni riga offre un nome opzionale, la scelta **Film e serie TV / Solo film / Solo serie TV**, pulsanti **↑ / ↓** e **×** per eliminare la riga.
-4. Premi **Genera cataloghi**. Usa **Installa su Stremio** oppure **Copia link manifest per Nuvio** e incollalo nella gestione Addon di Nuvio.
+4. Facoltativamente, inserisci la tua **chiave TMDB API v3** nel campo dedicato. Ha priorità sulla chiave del server e viene ripristinata riaprendo la configurazione. Premi **Genera cataloghi**. Usa **Installa su Stremio** oppure **Copia link manifest per Nuvio** e incollalo nella gestione Addon di Nuvio.
 5. Il link **Riapri questa configurazione** ripristina tutte le righe nel loro ordine. Anche il pulsante Configura dell'addon apre `/<config>/configure`.
 
 L'aspetto della pagina riprende [DubbedAnimeFeed](https://github.com/DevGizmo86/DubbedAnimeFeed), esaminato al commit `b79ca5c`: pannello scuro sopra uno sfondo viola, installazione Stremio, copia manifest e firma/supporto DevGizmo. L'editor dinamico delle liste è nuovo.
@@ -27,7 +27,7 @@ La separazione delle liste miste è coperta da test con dati controllati; i link
 
 - **Aggiunte/rimozioni di titoli nella stessa lista**: recepite alla scadenza della cache di 30 minuti, oltre all'eventuale cache del client.
 - **Aggiunte/rimozioni/riordino di liste o modifica dei tipi**: genera un nuovo link e aggiorna/reinstalla l'addon. L'ordine del manifest segue quello delle righe; l'ordinamento globale della home dipende anche dal client.
-- La configurazione è contenuta nel link (Base64URL, **non cifrata**): include soltanto link pubblici, modalità e nomi, senza password o chiavi API.
+- La configurazione è contenuta nel link (Base64URL, **non cifrata**): include link pubblici, modalità, nomi e, se inserita, la chiave TMDB personale. **Non condividere i link del manifest o di configurazione che contengono la tua chiave**. Anche server e client che gestiscono il link possono leggerla.
 - La scoperta automatica delle liste tramite username non è inclusa in questa versione.
 
 ## Avvio
@@ -47,7 +47,7 @@ Apri `http://localhost:7000/configure`. Per lo sviluppo: `npm run dev`.
 | `PUBLIC_URL` | Origine della richiesta | Origine HTTPS canonica dietro reverse proxy |
 | `TMDB_API_KEY` | Assente | Matching aggiuntivo, anche tramite locandina, e metadati italiani |
 
-Copia `.env.example` in `.env` se vuoi personalizzarle. La chiave TMDB è facoltativa, rimane **sul server** ed è ignorata da Git. Senza chiave l'addon usa IMDb/Cinemeta. La localizzazione italiana dei metadati è disponibile solo quando viene usato un risultato TMDB; le schede complete sono fornite da Cinemeta.
+Copia `.env.example` in `.env` se vuoi personalizzarle. La variabile `TMDB_API_KEY` è facoltativa, rimane **sul server** ed è ignorata da Git. La chiave personale inserita nella pagina ha priorità sulla variabile ed è contenuta nel link. Lascia il campo vuoto per rimuoverla e tornare alla chiave del server. Una chiave rifiutata da TMDB attiva il fallback IMDb/Cinemeta; le cache dei cataloghi e dei mapping sono separate per chiave. Senza chiave l'addon usa IMDb/Cinemeta. La localizzazione italiana dei metadati è disponibile solo quando viene usato un risultato TMDB; le schede complete sono fornite da Cinemeta.
 
 ## Identificativi, schede e riproduzione
 

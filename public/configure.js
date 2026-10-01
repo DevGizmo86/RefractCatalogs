@@ -15,6 +15,7 @@ function button(text, label, action, disabled = false, className = '') {
   return element;
 }
 function render() {
+  $('tmdb-key').disabled = generating;
   $('lists').replaceChildren();
   $('list-count').textContent = `${rows.length} / 30`;
   $('empty-message').hidden = !!rows.length;
@@ -84,7 +85,7 @@ $('generate-button').addEventListener('click', async () => {
   generating = true; const current = revision; render();
   $('status').className = ''; $('status').textContent = 'Verifico le liste e preparo i cataloghi…'; $('result').hidden = true;
   try {
-    const result = await post('/api/configure', { lists: rows.map(({ url, mode, name }) => ({ url, mode, name })) });
+    const result = await post('/api/configure', { lists: rows.map(({ url, mode, name }) => ({ url, mode, name })), tmdbKey: $('tmdb-key').value.trim() });
     if (current !== revision) return;
     const manifest = new URL(result.manifestPath, location.origin).href;
     $('manifest-url').value = manifest;
@@ -101,5 +102,7 @@ $('copyManifestBtn').addEventListener('click', async () => {
   catch { $('manifest-url').focus(); $('manifest-url').select(); $('status').textContent = 'Seleziona e copia il link del manifest.'; }
   setTimeout(() => { $('copyManifestBtn').textContent = 'Copia link manifest per Nuvio'; }, 2000);
 });
+$('tmdb-key').value = initial?.tmdbKey || '';
+$('tmdb-key').addEventListener('input', invalidate);
 if (initial) initial.lists.forEach(row => addRow(row.url, row.mode, row.name));
 render();

@@ -26,6 +26,13 @@
       <p id="empty-message" class="empty">Nessuna lista aggiunta. Inizia dal link della tua prima lista.</p>
       <p class="hint mixed-note">Una lista con film e serie TV può generare entrambi i cataloghi. Scegli “Solo film” o “Solo serie TV” per mostrarne uno. Le liste seguono l’ordine delle righe.</p>
     </section>
+    <section id="tmdb-settings" aria-labelledby="tmdb-title">
+      <h2 id="tmdb-title">Metadati TMDB</h2>
+      <p class="hint">Facoltativo: usa la tua chiave per riconoscere i titoli e ottenere nomi e descrizioni in italiano. Se lasci il campo vuoto, viene usata la chiave del server quando disponibile.</p>
+      <label for="tmdb-key">Chiave personale TMDB API v3</label>
+      <input id="tmdb-key" type="password" autocomplete="off" spellcheck="false" maxlength="32" aria-describedby="tmdb-key-note" placeholder="La tua API Key (v3 auth)">
+      <p id="tmdb-key-note" class="hint">Inserisci la API Key v3, disponibile nelle impostazioni API di TMDB. La chiave viene inclusa nel link di configurazione e del manifest, senza cifratura: non condividere questi link.</p>
+    </section>
     <section id="installation" aria-labelledby="install-title">
       <h2 id="install-title">Porta le liste nella tua app</h2>
       <p class="hint">Genera il collegamento dopo aver aggiunto o modificato le liste.</p>

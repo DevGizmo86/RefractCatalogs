@@ -98,3 +98,51 @@ test('servizio Refract condivide il download della stessa lista', async () => {
   await Promise.all([service.getList(url), service.getList(url)]);
   assert.equal(calls, 1);
 });
+
+
+test('chiave personale: validazione, trimming, round trip e compatibilità vecchi link', () => {
+  const key = 'abcdef0123456789'.repeat(2);
+  const config = normalizeConfig({ lists: [{ url }], tmdbKey: ` ${key} ` });
+  assert.equal(decodeConfig(encodeConfig(config)).tmdbKey, key);
+  assert.equal(decodeConfig(encodeConfig({ lists: [{ url }] })).tmdbKey, undefined);
+  assert.equal(normalizeConfig({ lists: [{ url }], tmdbKey: '  ' }).tmdbKey, undefined);
+  for (const tmdbKey of [123, {}, 'bad', 'g'.repeat(32), 'a'.repeat(33)]) {
+    assert.throws(() => normalizeConfig({ lists: [{ url }], tmdbKey }), /chiave TMDB/i);
+  }
+});
+
+test('chiave personale ha priorità, cache isolate e fallback con chiave rifiutata', async () => {
+  const calls = [];
+  const resolver = createResolver({ tmdbKey: 'server', getJson: async path => {
+    const parsed = new URL(path);
+    const key = parsed.searchParams.get('api_key');
+    calls.push(key);
+    if (key === 'invalid') throw new Error('Unauthorized');
+    if (path.includes('/search/multi')) return { results: [{ id: 1, media_type: 'movie', title: `Film ${key}`, original_title: 'Film', release_date: '2000-01-01' }] };
+    if (path.includes('/external_ids')) return { imdb_id: 'tt123' };
+    return { d: [{ id: 'tt123', qid: 'movie', l: 'Film fallback', y: 2000, i: { imageUrl: 'https://example.com/poster.jpg' } }] };
+  } });
+  const item = { title: 'Film', year: 2000, poster: 'https://example.com/poster.jpg' };
+  assert.equal((await resolver.resolve(item)).name, 'Film server');
+  assert.equal((await resolver.resolve(item, { tmdbKey: 'personal' })).name, 'Film personal');
+  assert.equal((await resolver.resolve(item, { tmdbKey: 'second' })).name, 'Film second');
+  const before = calls.length;
+  assert.equal((await resolver.resolve(item, { tmdbKey: 'personal' })).name, 'Film personal');
+  assert.equal((await resolver.resolve(item, { tmdbKey: '' })).name, 'Film server');
+  assert.equal(calls.length, before);
+  assert.equal((await resolver.resolve(item, { tmdbKey: 'invalid' })).name, 'Film fallback');
+  assert.deepEqual(calls, ['server', 'server', 'personal', 'personal', 'second', 'second', 'invalid', null]);
+});
+
+test('cache cataloghi separata per chiave e chiave propagata al resolver', async () => {
+  let calls = 0;
+  const service = createCatalogService({ getList: async () => ({ slug: 'mixed-abc', count: 1, items: [{ title: 'Film' }] }) }, {
+    resolve: async (_item, options) => { calls++; return { id: 'tt123', type: 'movie', name: options.tmdbKey || 'Default' }; }
+  });
+  const page = tmdbKey => service.page({ lists: [{ url, mode: 'movie' }], tmdbKey }, 'movie', 'refract-mixed-abc');
+  assert.equal((await page('one')).metas[0].name, 'one');
+  assert.equal((await page('two')).metas[0].name, 'two');
+  assert.equal((await page()).metas[0].name, 'Default');
+  assert.equal((await page('one')).metas[0].name, 'one');
+  assert.equal(calls, 3);
+});
