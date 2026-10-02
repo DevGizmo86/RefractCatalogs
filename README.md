@@ -1,6 +1,6 @@
 # RefractCatalogs
 
-Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.1.1**.
+Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.1.2**.
 
 ## Configurazione
 
