@@ -85,7 +85,37 @@ docker build -f docker/Dockerfile -t refractcatalogs .
 docker run --rm -p 7000:7000 refractcatalogs
 ```
 
-Per Beamup crea un'app **separata** da DubbedAnimeFeed tramite [beamup-cli](https://github.com/Stremio/stremio-beamup), registra il remote restituito e pubblica con `git push beamup main:main`. Non riutilizzare il remote dell'altro addon. Questo repository non contiene credenziali né un deployment automatico già configurato.
+Per Beamup crea un'app **separata** da DubbedAnimeFeed tramite [beamup-cli](https://github.com/Stremio/stremio-beamup), registra il remote restituito e pubblica con `git push beamup main:master` (destinazione predefinita della CLI Beamup). Non riutilizzare il remote dell'altro addon. Il repository non contiene credenziali. Per automatizzare il deploy, configura la workflow descritta sotto.
+
+## Deploy automatico su tag
+
+La workflow `.github/workflows/deploy-beamup.yml` pubblica su Beamup a ogni push di un tag stabile `vMAJOR.MINOR.PATCH`, per esempio `v0.1.1`. Prima verifica che il tag punti al commit corrente di `main`, che la versione corrisponda a `package.json` e `package-lock.json`, e che sintassi e test passino. Pubblica esattamente il commit del tag, senza push forzati. Le pubblicazioni vengono serializzate.
+
+Crea prima l'app Beamup `refractcatalogs` dalla cartella del progetto. In **Settings → Secrets and variables → Actions → New repository secret**, aggiungi:
+
+| Secret | Valore |
+| --- | --- |
+| `BEAMUP_REMOTE` | L'output di `git remote get-url beamup` dalla cartella **RefractCatalogs**; termina con `/refractcatalogs` se hai usato quel nome |
+| `BEAMUP_SSH_PRIVATE_KEY` | Il contenuto completo della chiave privata SSH autorizzata per il tuo account Beamup |
+| `BEAMUP_SSH_KNOWN_HOSTS` | La riga del server `a.baby-beamup.club` nel tuo file SSH `known_hosts` |
+
+Puoi riutilizzare chiave e riga `known_hosts` già usate per DubbedAnimeFeed se sono quelle dello stesso server/account. Il remote deve invece essere quello di **RefractCatalogs**. La chiave deve essere utilizzabile senza passphrase per il deploy non interattivo. In PowerShell, dopo una connessione SSH verificata al server, recupera la riga con:
+
+```powershell
+ssh-keygen -F a.baby-beamup.club -f "$env:USERPROFILE\.ssh\known_hosts"
+```
+
+La workflow usa il ramo remoto `master`, come la CLI Beamup. Se la tua app usa `main`, aggiungi la **repository variable** `BEAMUP_BRANCH` con valore `main` nella scheda Variables. Non impostare questa variabile al nome dell'app.
+
+Per pubblicare la versione attuale dopo aver configurato i secret:
+
+```powershell
+git pull origin main
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+Per una nuova versione, aggiorna prima entrambi i file con `npm version 0.1.2 --no-git-tag-version`, committa e pubblica le modifiche su `main`, poi crea e pubblica il tag `v0.1.2`. L'esito del deploy è nella scheda **Actions → Deploy to Beamup**. I tag già esistenti non vengono ripubblicati automaticamente dopo l'aggiunta della workflow. Una run fallita per secret mancanti può essere rieseguita da Actions dopo averli impostati.
 
 ## Fonti
 
