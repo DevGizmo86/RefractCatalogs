@@ -13,6 +13,7 @@
     <img class="logo" src="/assets/logo.svg" width="72" height="72" alt="">
     <p class="eyebrow">STREMIO + NUVIO</p>
     <h1>RefractCatalogs</h1>
+    <p class="version">Versione __ADDON_VERSION__</p>
     <p class="intro">Le tue liste Refract, pronte da sfogliare.</p>
     <section aria-labelledby="lists-title">
       <div class="section-heading"><h2 id="lists-title">Le tue liste</h2><span id="list-count">0 / 30</span></div>
@@ -45,6 +46,8 @@
         <label for="manifest-url">Link del manifest</label>
         <input id="manifest-url" readonly type="text" aria-label="Link del manifest">
         <a id="edit-link" href="#">Riapri questa configurazione</a>
+        <button id="copy-config-button" type="button">Copia link configurazione</button>
+        <p class="hint">Conserva il link della configurazione o aggiungilo ai preferiti per riaprirla e modificarla in seguito, anche da un altro dispositivo. Dopo ogni modifica genera e conserva il nuovo link. Se hai inserito una chiave TMDB, anche questo link la contiene: non condividerlo.</p>
         <p class="hint">In Nuvio incolla il link nella sezione Addon. Dopo aggiunte, eliminazioni o cambi di ordine, reinstalla o aggiorna l’addon con il nuovo link. I contenuti delle liste si aggiornano automaticamente, con una cache di circa 30 minuti.</p>
       </div>
     </section>

@@ -23,7 +23,7 @@ function createApp({ refract = createRefractService(), resolver = createResolver
   function sendConfig(req, res, config = null) {
     const bootstrap = JSON.stringify(config).replace(/</g, '\\u003c');
     res.set({ 'Cache-Control': 'no-store', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://image.tmdb.org https://cdn.getrefract.app; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'" });
-    res.type('html').send(template.replace('__CONFIG_JSON__', bootstrap));
+    res.type('html').send(template.replace('__ADDON_VERSION__', require('./package.json').version).replace('__CONFIG_JSON__', bootstrap));
   }
   app.get('/', (_req, res) => res.redirect('/configure'));
   app.get('/configure', (req, res) => sendConfig(req, res));

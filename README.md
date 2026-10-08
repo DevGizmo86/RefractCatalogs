@@ -1,6 +1,6 @@
 # RefractCatalogs
 
-Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.2.0**.
+Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.2.1**.
 
 ## Configurazione
 
@@ -8,7 +8,7 @@ Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://
 2. Incolla un link pubblico Refract e premi **Aggiungi lista**: viene creata una nuova riga e verificata la lista.
 3. Aggiungi altre liste (massimo 30). Ogni riga offre un nome opzionale, la scelta **Film e serie TV / Solo film / Solo serie TV**, pulsanti **↑ / ↓** e **×** per eliminare la riga.
 4. Facoltativamente, inserisci la tua **chiave TMDB API v3** nel campo dedicato. Ha priorità sulla chiave del server e viene ripristinata riaprendo la configurazione. Premi **Genera cataloghi**. Usa **Installa su Stremio** oppure **Copia link manifest per Nuvio** e incollalo nella gestione Addon di Nuvio.
-5. Il link **Riapri questa configurazione** ripristina tutte le righe nel loro ordine. Anche il pulsante Configura dell'addon apre `/<config>/configure`.
+5. Il link **Riapri questa configurazione** ripristina tutte le righe nel loro ordine. Anche il pulsante Configura dell'addon apre `/<config>/configure`. Usa **Copia link configurazione** e conserva il link o aggiungilo ai preferiti per recuperarla su qualsiasi dispositivo. Dopo ogni modifica conserva il nuovo link.
 
 Ogni riga offre **Miniature film** e/o **Miniature serie TV**, in base ai contenuti selezionati: scegli **Verticali (locandine)** oppure **Orizzontali (16:9)**. Una lista mista consente scelte indipendenti per i due cataloghi. L'impostazione viene salvata nel link e ripristinata riaprendolo; i vecchi link restano verticali. Per applicare una modifica a un addon già installato, genera il nuovo manifest e sostituisci la precedente installazione in Nuvio/Stremio.
 

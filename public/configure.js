@@ -114,6 +114,12 @@ $('copyManifestBtn').addEventListener('click', async () => {
   setTimeout(() => { $('copyManifestBtn').textContent = 'Copia link manifest per Nuvio'; }, 2000);
 });
 $('tmdb-key').value = initial?.tmdbKey || '';
+$('copy-config-button').addEventListener('click', async () => {
+  const value = $('edit-link').href;
+  try { await navigator.clipboard.writeText(value); $('copy-config-button').textContent = 'Link copiato!'; }
+  catch { $('status').textContent = 'Apri “Riapri questa configurazione” e conserva il link dalla barra degli indirizzi o aggiungilo ai preferiti.'; }
+  setTimeout(() => { $('copy-config-button').textContent = 'Copia link configurazione'; }, 2000);
+});
 $('tmdb-key').addEventListener('input', invalidate);
 if (initial) initial.lists.forEach(row => addRow(row.url, row.mode, row.name, row.posterShapes));
 render();
