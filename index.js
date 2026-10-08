@@ -59,7 +59,7 @@ function createApp({ refract = createRefractService(), resolver = createResolver
   }));
   app.use((_req, res) => res.status(404).json({ error: 'Risorsa non trovata.' }));
   app.use((err, _req, res, _next) => {
-    const invalid = /configurazione|chiave TMDB|link|lista mancante|tipo catalogo|stessa lista|aggiungi da|paginazione|identificativo/i.test(err.message);
+    const invalid = /configurazione|chiave TMDB|formato miniature|link|lista mancante|tipo catalogo|stessa lista|aggiungi da|paginazione|identificativo/i.test(err.message);
     const status = err.type === 'entity.too.large' ? 413 : err instanceof SyntaxError || invalid ? 400 : 502;
     res.set('Cache-Control', 'no-store').status(status).json({ error: status === 413 ? 'Configurazione troppo grande.' : err.message || 'Servizio temporaneamente non disponibile.' });
   });

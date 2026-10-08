@@ -20,6 +20,42 @@ test('rifiuta SSRF, URL non-lista, duplicati e configurazioni malformate', () =>
   assert.throws(() => decodeConfig('bad'));
   assert.throws(() => normalizeConfig({ lists: [] }));
 });
+test('miniature: vecchi link verticali, scelta separata e validazione', () => {
+  const oldToken = Buffer.from(JSON.stringify({ v: 1, lists: [{ url, mode: 'both' }] })).toString('base64url');
+  assert.deepEqual(decodeConfig(oldToken).lists[0].posterShapes, { movie: 'poster', series: 'poster' });
+  const config = { lists: [{ url, posterShapes: { movie: 'landscape', series: 'poster' } }] };
+  assert.deepEqual(decodeConfig(encodeConfig(config)).lists[0].posterShapes, config.lists[0].posterShapes);
+  for (const posterShapes of ['landscape', [], { movie: 'square' }, { series: 1 }]) {
+    assert.throws(() => normalizeConfig({ lists: [{ url, posterShapes }] }), /Formato miniature/);
+  }
+});
+test('miniature: immagini orizzontali senza contaminare cataloghi verticali o altre liste', async () => {
+  let lookups = 0;
+  const secondUrl = 'https://getrefract.app/list/second-abc';
+  const service = createCatalogService({ getList: async url => ({ slug: listSlug(url), count: 2, items: [{ title: 'Film', type: 'movie' }, { title: 'Serie', type: 'series' }] }) }, {
+    resolve: async item => ({ id: item.type === 'movie' ? 'tt1' : 'tt2', type: item.type, name: item.title, poster: 'vertical.jpg' }),
+    getMeta: async () => { lookups++; return { background: 'horizontal.jpg' }; }
+  });
+  const config = normalizeConfig({ lists: [{ url, mode: 'both', posterShapes: { movie: 'landscape', series: 'poster' } }, { url: secondUrl, mode: 'movie' }] });
+  const movies = await service.page(config, 'movie', 'refract-mixed-abc');
+  assert.equal(movies.metas[0].poster, 'horizontal.jpg'); assert.equal(movies.metas[0].posterShape, 'landscape');
+  const series = await service.page(config, 'series', 'refract-mixed-abc');
+  assert.equal(series.metas[0].poster, 'vertical.jpg'); assert.equal(series.metas[0].posterShape, 'poster');
+  const vertical = await service.page(normalizeConfig({ lists: [{ url, mode: 'both' }] }), 'movie', 'refract-mixed-abc');
+  assert.equal(vertical.metas[0].poster, 'vertical.jpg'); assert.equal(vertical.metas[0].posterShape, 'poster');
+  assert.equal((await service.page(config, 'movie', 'refract-second-abc')).metas[0].posterShape, 'poster');
+  assert.equal(lookups, 1);
+});
+test('miniature: preferisce sfondo TMDB e mantiene la locandina se Cinemeta fallisce', async () => {
+  let lookups = 0;
+  const service = createCatalogService({ getList: async () => ({ slug: 'mixed-abc', count: 2, items: [{ title: 'Film', background: 'tmdb.jpg' }, { title: 'Altro' }] }) }, {
+    resolve: async item => ({ id: item.title === 'Film' ? 'tt1' : 'tt2', type: 'movie', name: item.title, poster: 'vertical.jpg', background: item.background }),
+    getMeta: async () => { lookups++; throw new Error('offline'); }
+  });
+  const page = await service.page(normalizeConfig({ lists: [{ url, mode: 'movie', posterShapes: { movie: 'landscape' } }] }), 'movie', 'refract-mixed-abc');
+  assert.deepEqual(page.metas.map(meta => [meta.poster, meta.posterShape]), [['tmdb.jpg', 'landscape'], ['vertical.jpg', 'landscape']]);
+  assert.equal(lookups, 1);
+});
 test('parser legge liste miste e tutti i 250 elementi, controllando il conteggio', () => {
   const items = Array.from({ length: 250 }, (_, i) => ({ title: `Title ${i}`, year: 2000 + i % 20 }));
   const list = parseList(fixture(items), 'mixed-abc');
@@ -49,9 +85,10 @@ test('resolver risolve film e serie senza chiave e mantiene gli ID IMDb', async 
   assert.equal((await resolver.resolve({ title: 'The Conjuring', year: 2013 })).id, 'tt1457767');
 });
 test('TMDB usa la locandina per risolvere titoli tradotti e converte in IMDb', async () => {
-  const resolver = createResolver({ tmdbKey: 'test', getJson: async path => path.includes('/search/multi') ? { results: [{ id: 1396, media_type: 'tv', name: 'Titolo localizzato', original_name: 'Original title', first_air_date: '2008-01-01', poster_path: '/poster.jpg' }] } : { imdb_id: 'tt0903747' } });
+  const resolver = createResolver({ tmdbKey: 'test', getJson: async path => path.includes('/search/multi') ? { results: [{ id: 1396, media_type: 'tv', name: 'Titolo localizzato', original_name: 'Original title', first_air_date: '2008-01-01', poster_path: '/poster.jpg', backdrop_path: '/background.jpg' }] } : { imdb_id: 'tt0903747' } });
   const value = await resolver.resolve({ title: 'Altro titolo', year: 2008, poster: 'https://image.tmdb.org/t/p/w500/poster.jpg' });
   assert.equal(value.id, 'tt0903747'); assert.equal(value.type, 'series');
+  assert.equal(value.background, 'https://image.tmdb.org/t/p/w780/background.jpg');
 });
 test('IMDb distingue film e serie, ignorando persone ed episodi', async () => {
   const resolver = createResolver({ tmdbKey: '', getJson: async () => ({ d: [

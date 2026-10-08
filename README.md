@@ -1,6 +1,6 @@
 # RefractCatalogs
 
-Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.1.3**.
+Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.2.0**.
 
 ## Configurazione
 
@@ -9,6 +9,10 @@ Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://
 3. Aggiungi altre liste (massimo 30). Ogni riga offre un nome opzionale, la scelta **Film e serie TV / Solo film / Solo serie TV**, pulsanti **↑ / ↓** e **×** per eliminare la riga.
 4. Facoltativamente, inserisci la tua **chiave TMDB API v3** nel campo dedicato. Ha priorità sulla chiave del server e viene ripristinata riaprendo la configurazione. Premi **Genera cataloghi**. Usa **Installa su Stremio** oppure **Copia link manifest per Nuvio** e incollalo nella gestione Addon di Nuvio.
 5. Il link **Riapri questa configurazione** ripristina tutte le righe nel loro ordine. Anche il pulsante Configura dell'addon apre `/<config>/configure`.
+
+Ogni riga offre **Miniature film** e/o **Miniature serie TV**, in base ai contenuti selezionati: scegli **Verticali (locandine)** oppure **Orizzontali (16:9)**. Una lista mista consente scelte indipendenti per i due cataloghi. L'impostazione viene salvata nel link e ripristinata riaprendolo; i vecchi link restano verticali. Per applicare una modifica a un addon già installato, genera il nuovo manifest e sostituisci la precedente installazione in Nuvio/Stremio.
+
+Il formato orizzontale usa lo sfondo TMDB quando disponibile, altrimenti quello di Cinemeta, anche senza chiave TMDB. Se lo sfondo manca o il servizio non risponde, viene mantenuta la locandina disponibile nel formato scelto. L'addon comunica il formato tramite `posterShape`: le impostazioni di visualizzazione forzate dal client possono prevalere.
 
 L'aspetto della pagina riprende [DubbedAnimeFeed](https://github.com/DevGizmo86/DubbedAnimeFeed), esaminato al commit `b79ca5c`: pannello scuro sopra uno sfondo viola, installazione Stremio, copia manifest e firma/supporto DevGizmo. L'editor dinamico delle liste è nuovo.
 

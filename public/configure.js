@@ -41,12 +41,23 @@ function render() {
     const typeLabel = document.createElement('label'); typeLabel.textContent = 'Contenuti'; typeLabel.htmlFor = `type-${row.id}`;
     const type = document.createElement('select'); type.id = typeLabel.htmlFor; type.disabled = generating;
     [['both', 'Film e serie TV'], ['movie', 'Solo film'], ['series', 'Solo serie TV']].forEach(([value, text]) => { const option = new Option(text, value); type.append(option); });
-    type.value = row.mode; type.addEventListener('change', () => { row.mode = type.value; invalidate(); }); typeBox.append(typeLabel, type);
+    type.value = row.mode; type.addEventListener('change', () => { row.mode = type.value; invalidate(); render(); }); typeBox.append(typeLabel, type);
     details.append(nameBox, typeBox);
+    const shapes = document.createElement('div'); shapes.className = 'row-shapes';
+    for (const catalogType of ['movie', 'series']) {
+      if (row.mode !== 'both' && row.mode !== catalogType) continue;
+      const box = document.createElement('div');
+      const label = document.createElement('label'); label.textContent = `Miniature ${catalogType === 'movie' ? 'film' : 'serie TV'}`; label.htmlFor = `shape-${catalogType}-${row.id}`;
+      const select = document.createElement('select'); select.id = label.htmlFor; select.disabled = generating;
+      [['poster', 'Verticali (locandine)'], ['landscape', 'Orizzontali (16:9)']].forEach(([value, text]) => select.append(new Option(text, value)));
+      select.value = row.posterShapes[catalogType];
+      select.addEventListener('change', () => { row.posterShapes[catalogType] = select.value; invalidate(); });
+      box.append(label, select); shapes.append(box);
+    }
     const url = document.createElement('span'); url.className = 'row-url'; url.textContent = row.url;
     const state = document.createElement('p'); state.className = `row-state${row.error ? ' error' : ''}`;
     state.textContent = row.error || (row.count === undefined ? 'Verifica della lista in corso…' : `${row.count} titoli · ${row.author}`);
-    article.append(top, details, url, state);
+    article.append(top, details, shapes, url, state);
     if (row.error) article.append(button('Riprova', `Riprova ${row.remoteName || 'lista'}`, () => inspect(row)));
     $('lists').append(article);
   });
@@ -65,13 +76,13 @@ async function inspect(row) {
   } catch (error) { row.error = error.message; }
   if (rows.includes(row)) render();
 }
-function addRow(url, mode = 'both', name = '') {
+function addRow(url, mode = 'both', name = '', posterShapes = {}) {
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:' || parsed.hostname !== 'getrefract.app' || parsed.port || parsed.username || parsed.password || !/^\/list\/[a-z0-9][a-z0-9-]{0,199}\/?$/.test(parsed.pathname)) throw new Error('Inserisci un link https://getrefract.app/list/...');
   const canonical = `https://getrefract.app${parsed.pathname.replace(/\/$/, '')}`;
   if (rows.some(row => row.url === canonical)) throw new Error('Questa lista è già presente.');
   if (rows.length >= 30) throw new Error('Puoi aggiungere al massimo 30 liste.');
-  const row = { id: crypto.randomUUID(), url: canonical, name, mode, remoteName: name };
+  const row = { id: crypto.randomUUID(), url: canonical, name, mode, posterShapes: { movie: posterShapes.movie || 'poster', series: posterShapes.series || 'poster' }, remoteName: name };
   rows.push(row); invalidate(); render(); inspect(row);
 }
 $('add-form').addEventListener('submit', event => {
@@ -85,7 +96,7 @@ $('generate-button').addEventListener('click', async () => {
   generating = true; const current = revision; render();
   $('status').className = ''; $('status').textContent = 'Verifico le liste e preparo i cataloghi…'; $('result').hidden = true;
   try {
-    const result = await post('/api/configure', { lists: rows.map(({ url, mode, name }) => ({ url, mode, name })), tmdbKey: $('tmdb-key').value.trim() });
+    const result = await post('/api/configure', { lists: rows.map(({ url, mode, name, posterShapes }) => ({ url, mode, name, posterShapes })), tmdbKey: $('tmdb-key').value.trim() });
     if (current !== revision) return;
     const manifest = new URL(result.manifestPath, location.origin).href;
     $('manifest-url').value = manifest;
@@ -104,5 +115,5 @@ $('copyManifestBtn').addEventListener('click', async () => {
 });
 $('tmdb-key').value = initial?.tmdbKey || '';
 $('tmdb-key').addEventListener('input', invalidate);
-if (initial) initial.lists.forEach(row => addRow(row.url, row.mode, row.name));
+if (initial) initial.lists.forEach(row => addRow(row.url, row.mode, row.name, row.posterShapes));
 render();
