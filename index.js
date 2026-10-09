@@ -53,10 +53,6 @@ function createApp({ refract = createRefractService(), resolver = createResolver
     if (result.diagnostics?.unmatched) console.warn(`RefractCatalogs: ${result.diagnostics.unmatched} titoli senza corrispondenza (${req.params.id}).`);
     res.set('Cache-Control', 'public, max-age=1800').json({ metas: result.metas, cacheMaxAge: result.cacheMaxAge });
   }));
-  app.get('/:config/meta/:type/:id.json', asyncRoute(async (req, res) => {
-    decodeConfig(req.params.config);
-    res.set('Cache-Control', 'public, max-age=3600').json({ meta: await resolver.getMeta(req.params.type, req.params.id), cacheMaxAge: 3600 });
-  }));
   app.use((_req, res) => res.status(404).json({ error: 'Risorsa non trovata.' }));
   app.use((err, _req, res, _next) => {
     const invalid = /configurazione|chiave TMDB|formato miniature|link|lista mancante|tipo catalogo|stessa lista|aggiungi da|paginazione|identificativo/i.test(err.message);

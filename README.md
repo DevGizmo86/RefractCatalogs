@@ -1,6 +1,6 @@
 # RefractCatalogs
 
-Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.2.2**.
+Addon **Stremio / Nuvio** che trasforma le liste pubbliche di [Refract](https://getrefract.app/) in cataloghi di film e serie TV. Versione: **0.2.4**.
 
 ## Configurazione
 
@@ -57,7 +57,7 @@ Copia `.env.example` in `.env` se vuoi personalizzarle. La variabile `TMDB_API_K
 
 Il resolver usa titolo e anno, rifiuta corrispondenze ambigue e conserva gli ID IMDb (`tt...`). Con TMDB può usare la locandina come prova aggiuntiva e converte gli ID TMDB in IMDb tramite `external_ids`. Non sceglie automaticamente il primo risultato di ricerca.
 
-L'addon fornisce `catalog` e `meta`; le schede complete e gli episodi sono letti da Cinemeta. Gli addon di streaming già installati ricevono i normali ID IMDb. RefractCatalogs non fornisce stream e non sincronizza il progresso di visione verso Refract.
+L'addon espone solo `catalog`. Le schede complete e gli episodi sono forniti dagli addon di metadati installati nel client, come EasyCatalogs o Cinemeta. Gli addon di streaming già installati ricevono i normali ID IMDb. RefractCatalogs non fornisce stream e non sincronizza il progresso di visione verso Refract.
 
 ## Limiti e prestazioni
 
