@@ -1,6 +1,6 @@
 {
   "name": "refract-catalogs",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Cataloghi Stremio e Nuvio dalle liste pubbliche Refract",
   "main": "index.js",
   "scripts": {
